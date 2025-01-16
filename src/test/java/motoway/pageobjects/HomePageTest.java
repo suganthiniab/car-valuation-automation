@@ -2,7 +2,10 @@ package motoway.pageobjects;
 
 import motorway.util.BrowserManager;
 import motoway.pageobjects.util.FileUtil;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
@@ -14,6 +17,8 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+
 
 public class HomePageTest {
 
@@ -35,12 +40,8 @@ public class HomePageTest {
         homePageMotorway.inputRegistrationNumber(registrationNumber);
         homePageMotorway.clickValueYourCar();
 
-        //driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5));
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(7));
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath( "//h1") ));
 
         String actualResult_makeModel = homePageMotorway.getLabel_displayMakeModel();
         Assert.assertEquals(actualResult_makeModel, car.model);
@@ -57,8 +58,9 @@ public class HomePageTest {
     @DataProvider(name = "cardata")
     public Object[] getcardata() {
 
-        List<String> list = new ArrayList<>();
-        list.add("AD58 VNF");//fileUtil.testReadInputFile();
+       /* List<String> list = new ArrayList<>();
+        list.add("AD58 VNF");*/
+        List<String> list = fileUtil.testReadInputFile();
         return list.toArray();
     }
 
