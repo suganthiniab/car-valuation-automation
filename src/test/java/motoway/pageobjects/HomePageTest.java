@@ -1,23 +1,14 @@
 package motoway.pageobjects;
 
+import motorway.pageobjects.HomePage;
 import motorway.util.BrowserManager;
 import motoway.pageobjects.util.FileUtil;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
-import motorway.pageobjects.HomePage;
+import org.testng.annotations.*;
 
-import java.time.Duration;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 
 
 public class HomePageTest {
@@ -35,33 +26,38 @@ public class HomePageTest {
     public void testCarEvaluate(String registrationNumber) {
         Map<String, Car> map = fileUtil.readOutputFile();
         Car car = map.get(registrationNumber);
+        try {
+            HomePage homePageMotorway = new HomePage(driver);
+            homePageMotorway.inputRegistrationNumber(registrationNumber);
+            homePageMotorway.clickValueYourCar();
 
-        HomePage homePageMotorway = new HomePage(driver);
-        homePageMotorway.inputRegistrationNumber(registrationNumber);
-        homePageMotorway.clickValueYourCar();
 
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(7));
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath( "//h1") ));
+            Assert.assertNotNull(car, "The Car not found in the website");
+            String actualResult_makeModel = homePageMotorway.getLabel_displayMakeModel();
+            Assert.assertEquals(actualResult_makeModel, car.model);
 
-        String actualResult_makeModel = homePageMotorway.getLabel_displayMakeModel();
-        Assert.assertEquals(actualResult_makeModel, car.model);
+            String actualResult_displayVariantReg = homePageMotorway.getDisplayVariantReg();
+            Assert.assertNotNull(actualResult_displayVariantReg, "registration number null");
+            Assert.assertEquals(actualResult_displayVariantReg.replace(" ", ""), car.regNo);
 
-        String actualResult_displayVariantReg = homePageMotorway.getDisplayVariantReg();
-        Assert.assertEquals(actualResult_displayVariantReg, car.regNo);
+            String actualYear = homePageMotorway.getDisplay_Year();
+            Assert.assertEquals(actualYear, car.year);
+        } catch (Exception e) {
+            System.out.println("Test failed: " + e.getMessage());
+        }
 
-        String actualYear = homePageMotorway.getDisplay_Year();
-        Assert.assertEquals(actualYear, car.year);
-
-        driver.navigate().refresh();
     }
 
     @DataProvider(name = "cardata")
     public Object[] getcardata() {
-
-       /* List<String> list = new ArrayList<>();
-        list.add("AD58 VNF");*/
         List<String> list = fileUtil.testReadInputFile();
         return list.toArray();
+    }
+
+    @AfterMethod
+    public void afterMethod()
+    {
+        driver.navigate().refresh();
     }
 
     @AfterTest

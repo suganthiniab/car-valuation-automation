@@ -14,8 +14,11 @@ import java.util.regex.Pattern;
 public class FileUtil {
 
     public static void main(String[] args) {
-        new FileUtil().readOutputFile();
-        new FileUtil().testReadInputFile();
+       Map<String, Car> carMap = new FileUtil().readOutputFile();
+       List<String> carList = new FileUtil().testReadInputFile();
+
+        System.out.println(carMap);
+        System.out.println(carList);
     }
 
     public List<String> testReadInputFile()
@@ -34,7 +37,7 @@ public class FileUtil {
                 // Find and print the registration number
                 while (matcher.find()) {
                     String matches = matcher.group();
-                    registrationNumberList.add(matches);
+                    registrationNumberList.add(matches.replace(" ", ""));
                     System.out.println("Found registration number: " + matches);
                 }
 
@@ -59,7 +62,7 @@ public class FileUtil {
                     continue;
                 }
                 String[] split = line.split(",");
-                String regNumber = split[0];
+                String regNumber = split[0].replace(" ", "");
                 String model = split[1];
                 String year = split[2];
 
