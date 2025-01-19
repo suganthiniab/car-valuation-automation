@@ -1,9 +1,9 @@
 package motorway.pageobjects;
 
 import org.openqa.selenium.By;
-import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
@@ -12,44 +12,70 @@ public class HomePage {
 
     private WebDriver driver;
 
-    static String makeModel_header = "//h1";
-    static String registrationText_id = "vrm-input";
-    static String evaluvateButton_xpath = "//span[@class='Button-module__label-SKEy']";
-    static String registrationNo_xpath = "//div[@class='VRM-module__vrm-hdeF VRM-module__regular-RiIR VRM-module__front-BTQb']";
-    static String year_xpath = "//ul[@class='HeroVehicle__details-XpAI']/li[1]";
+    By registrationNoTextBox = By.id("vrm-input");
+    By evaluateButton = By.xpath("//span[@class='Button-module__label-SKEy']");
+    By makeModelLabel = By.xpath("//h1");
+    By registrationNoLabel = By.xpath("//div[@class='VRM-module__vrm-hdeF VRM-module__regular-RiIR VRM-module__front-BTQb']");
+    By yearLabel = By.xpath("//ul[@class='HeroVehicle__details-XpAI']/li[1]");
+    By checkAgainButton = By.xpath("//span[text()='Check again']");
+    By mileageTextBox = By.id("mileage-input");
+    By confirmMileageButton = By.xpath("//span[text()='Confirm mileage']");
 
+    WebElement foundElement;
 
     public HomePage(WebDriver driver) {
         this.driver = driver;
     }
 
     public void inputRegistrationNumber(String registrationNumber) {
-        driver.findElement(By.id(registrationText_id)).sendKeys(registrationNumber);
+        driver.findElement(registrationNoTextBox).sendKeys(registrationNumber);
     }
 
     public void clickValueYourCar() {
-        driver.findElement(By.xpath(evaluvateButton_xpath)).click();
+        driver.findElement(evaluateButton).click();
 
-        try {
-            //wait for valuation complete
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(7));
-            wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(registrationNo_xpath)));
-        } catch (TimeoutException e) {
-            System.out.println(" Element is not visible");
-            throw new AssertionError("Car registration lookup failed for " + driver.findElement(By.id(registrationText_id)).getText());
-        }
+        foundElement = waitForEitherElementPresence(driver, registrationNoLabel, checkAgainButton);
+    }
+
+    public boolean isCarFound() {
+        return !foundElement.getText().equalsIgnoreCase("Check again");
     }
 
     public String getLabel_displayMakeModel() {
-        return driver.findElement(By.xpath(makeModel_header)).getText();
+        return driver.findElement(makeModelLabel).getText();
     }
 
     public String getDisplayVariantReg() {
-        return driver.findElement(By.xpath(registrationNo_xpath)).getText();
+        return driver.findElement(registrationNoLabel).getText();
     }
 
     public String getDisplay_Year() {
-        return driver.findElement(By.xpath(year_xpath)).getText();
+        return driver.findElement(yearLabel).getText();
+    }
+
+    public void enterMileage(String mileage) {
+        driver.findElement(mileageTextBox).sendKeys(mileage);
+    }
+
+    public void clickConfirmMileage() {
+        driver.findElement(confirmMileageButton).click();
+    }
+
+    private WebElement waitForEitherElementPresence(WebDriver driver, By registrationNoLabel, By checkAgainButton) {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        return wait.until((ExpectedCondition<WebElement>) wd -> {
+            try {
+                return wd.findElement(registrationNoLabel);
+            } catch (Exception ignored) {
+
+            }
+            try {
+                return wd.findElement(checkAgainButton);
+            } catch (Exception ignored) {
+
+            }
+            return null;
+        });
     }
 }
 
